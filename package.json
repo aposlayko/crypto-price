@@ -1,0 +1,27 @@
+{
+  "name": "crypto-price",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aposlayko/crypto-price.git"
+  },
+  "keywords": [
+    "crypto"
+  ],
+  "author": "Alexandr Poslayko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aposlayko/crypto-price/issues"
+  },
+  "homepage": "https://github.com/aposlayko/crypto-price#readme",
+  "dependencies": {
+    "googleapis": "^39.2.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
+  }
+}

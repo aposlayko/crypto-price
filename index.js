@@ -1,7 +1,11 @@
 const fs = require('fs');
-const {google} = require('googleapis');
+const { google } = require('googleapis');
 var http = require('http');
 const rp = require('request-promise');
+
+const TAB = 'Portfolio';
+const RANGE = 'A2:D39';
+const DEFAULT_CURRENCY = 'USD';
 
 // {
 //   "googleApiKey": "AIzaSyDdD9INQluHYB_gl5BvxcebTEelRbPHRUQ",
@@ -12,46 +16,66 @@ const rp = require('request-promise');
 // Load client secrets from a local file.
 fs.readFile('config.json', (async (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
-  
-  const {googleApiKey, coinmarketcapApiKey, spreadsheetId} = JSON.parse(content);  
 
-  await getListOfTickers(googleApiKey, spreadsheetId);
-  // getPrices(coinmarketcapApiKey);
+  const { googleApiKey, coinmarketcapApiKey, spreadsheetId } = JSON.parse(content);
+
+  const dataCells = await getDataCells(googleApiKey, spreadsheetId);
+  const tickers = tranformDataCellsToTickerList(dataCells);
+  const coinInfo = await getCoinInfo(coinmarketcapApiKey, tickers);
+  console.log('Finish result', coinInfo);  
 }));
 
-async function getListOfTickers(auth, spreadsheetId) {
-  const sheets = google.sheets({version: 'v4', auth});
+async function getDataCells(auth, spreadsheetId) {
+  return new Promise((resolve, reject) => {
+    const sheets = google.sheets({ version: 'v4', auth });
 
-  sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: 'Portfolio!A2:C39',
-  }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
-    console.log(res.data);
-    const rows = res.data.values;
-    if (rows.length) {            
-      rows.map((row) => {
-        console.log(row[0], row[2]);
-      });
-    } else {
-      console.log('No data found.');
-    }
+    sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${TAB}!${RANGE}`,
+    }, (err, res) => {
+      if (err) return console.log('The API returned an error: ' + err);
+      
+      resolve(res.data.values);      
+    });
   });
 }
 
-function getPrices(coinmarketcapApiKey, cryptoList = ['BTC', 'BNB']) {
-  var options = {
-    method: 'GET',
-    uri: 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest',
-    qs: {'symbol': cryptoList.join(',')},
-    headers: {'X-CMC_PRO_API_KEY': coinmarketcapApiKey},
-    json: true,
-    gzip: true
-  };
+function setDataCells(auth, spreadsheetId) {
+  const sheets = google.sheets({ version: 'v4', auth });
+}
+
+function tranformDataCellsToTickerList(dataCells) {
+  return dataCells.filter((o) => o[0]).map((o) => o[0]);
+}
+
+// return Promice<[{COIN_NAME: price}, ...]>
+async function getCoinInfo(coinmarketcapApiKey, cryptoList = ['BTC', 'BNB']) {
+  return new Promise((resolve, reject) => {
+    var options = {
+      method: 'GET',
+      uri: 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest',
+      qs: { 'symbol': cryptoList.join(',') },
+      headers: { 'X-CMC_PRO_API_KEY': coinmarketcapApiKey },
+      json: true,
+      gzip: true
+    };
   
-  rp(options).then(response => {
-    console.log('API call response:', response);
-  }).catch((err) => {
-    console.log('API call error:', err.message);
-  });
+    rp(options).then(response => {
+      const info = {};
+      console.log('API call response:', response);
+      if (response.data) {
+        const data = response.data;
+
+        for (let key in data) {        
+          if (data[key]) {
+            info[key] = data[key].quote[DEFAULT_CURRENCY].price;
+          }
+        }
+
+        resolve(info);  
+      }   
+    }).catch((err) => {
+      console.log('API call error:', err.message);
+    });
+  });  
 }

@@ -24,7 +24,6 @@ const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = 'token.json';
-let googleApiKey;
 let coinmarketcapApiKey;
 
 
@@ -37,7 +36,6 @@ const job = schedule.scheduleJob('15 * * * * ', function () {
     const configContent = JSON.parse(content);
     const { clientId, clientSecret } = configContent;
 
-    googleApiKey = configContent.googleApiKey;
     coinmarketcapApiKey = configContent.coinmarketcapApiKey;
 
     authorize(clientId, clientSecret, startApp);

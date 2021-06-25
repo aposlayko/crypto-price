@@ -2,8 +2,7 @@
     "compilerOptions": {
       "esModuleInterop": true,
       "outDir": "dist",
-      "baseUrl": ".",
-      "strict": true,
+      "baseUrl": ".",      
       "sourceMap": true
     }    
 }

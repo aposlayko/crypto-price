@@ -1,7 +1,7 @@
 import express from 'express'
 import path from 'path';
+import { router } from './analytic.router';
 
-const router = require('./router');
 const app = express();
 const port = 3000;
 

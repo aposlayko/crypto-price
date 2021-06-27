@@ -15,13 +15,14 @@ class GoogleService {
 
   getCells(spreadsheetId: string, tab: string, range: string): Promise<any[][]> {
     return new Promise((resolve, reject) => {
-      const sheets = google.sheets({ version: 'v4' });
+      const sheets = google.sheets({ version: 'v4' });  
   
       sheets.spreadsheets.values.get({
         spreadsheetId,
         auth: this.oAuth2Client,
         range:  `${tab}!${range}`,
       }, (err, res) => {
+        console.log('after getCells', this.oAuth2Client);
         if (err) {
           console.log('The API returned an error: ' + err);
           reject(err);
@@ -65,14 +66,15 @@ class GoogleService {
     const oAuth2Client = new google.auth.OAuth2(
       clientId,
       clientSecret,
-      "https://google.com"
+      redirectUrl
     );
 
     // Check if we have previously stored a token.
     fs.readFile(GoogleService.TOKEN_PATH, (err, token: unknown) => {
-      if (err) return this.getNewToken(oAuth2Client);
+      if (err) return this.getNewToken(oAuth2Client);      
+      
       oAuth2Client.setCredentials(JSON.parse(token as string));
-      this.oAuth2Client = oAuth2Client;
+      this.oAuth2Client = oAuth2Client;      
     });
   }
 
@@ -90,6 +92,8 @@ class GoogleService {
 
     rl.question('Enter the code from that page (query param) here: ', (code) => {
       rl.close();
+      console.log('code', code);
+      
       oAuth2Client.getToken(code, (err, token) => {
         if (err) return console.error('Error while trying to retrieve access token', err);
         oAuth2Client.setCredentials(token);

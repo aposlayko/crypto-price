@@ -9,9 +9,9 @@ console.log(path.join(__dirname, 'assets'));
 
 
 app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'templates'));
+app.set('views', path.join(__dirname, '../client/templates'));
 
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/assets', express.static(path.join(__dirname, '../client/assets')));
 
 app.use('/update-analytics', router);
 

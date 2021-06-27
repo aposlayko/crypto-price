@@ -1,4 +1,4 @@
-import express, { response } from 'express';
+import express from 'express';
 import { CoinMarketCapService } from './coinmarketcap.service';
 import { googleService } from './google.service';
 

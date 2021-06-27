@@ -22,7 +22,6 @@ class GoogleService {
         auth: this.oAuth2Client,
         range:  `${tab}!${range}`,
       }, (err, res) => {
-        console.log('after getCells', this.oAuth2Client);
         if (err) {
           console.log('The API returned an error: ' + err);
           reject(err);

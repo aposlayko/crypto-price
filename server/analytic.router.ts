@@ -1,6 +1,7 @@
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import { CoinMarketCapService } from './coinmarketcap.service';
 import { googleService } from './google.service';
+import { TransactionsListModel } from './transactions-list.mode';
 
 export const router = express.Router();
 
@@ -9,7 +10,10 @@ const TICKER_RANGE = 'A2:A39';
 const PRICE_RANGE = 'D2:D39';
 const SPREADSHEET_ID = '17D4eYUyrYZepfIx85B2_R6ccU9GocaVyEBsCyKoHUJ8';
 
-router.post('/', async (req: any, res: any) => {
+const TRANSACTION_TAB = 'Transactions';
+const TRANSACTION_RANGE = 'A2:E'
+
+router.post('/update-old', async (req: any, res: any) => {
   const response = await googleService.getCells(SPREADSHEET_ID, TAB, TICKER_RANGE);
   const tickerList = response.filter((o) => o[0]).map((o) => o[0]);
   const coinInfo =  await CoinMarketCapService.getCoinInfo(tickerList);
@@ -20,3 +24,9 @@ router.post('/', async (req: any, res: any) => {
 
   res.json({isUpdated});
 });
+
+router.post('/update', async (req, res) => {
+  const response = await googleService.getCells(SPREADSHEET_ID, TRANSACTION_TAB, TRANSACTION_RANGE);
+  const transactions = new TransactionsListModel(response);
+  res.json({transactions: transactions.getUniqueNames()});
+})

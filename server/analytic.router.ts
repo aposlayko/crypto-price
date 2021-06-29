@@ -28,5 +28,5 @@ router.post('/update-old', async (req: any, res: any) => {
 router.post('/update', async (req, res) => {
   const response = await googleService.getCells(SPREADSHEET_ID, TRANSACTION_TAB, TRANSACTION_RANGE);
   const transactions = new TransactionsListModel(response);
-  res.json({transactions: transactions.getUniqueNames()});
+  res.json({result: transactions.getAmount('ETH')});
 })

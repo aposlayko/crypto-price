@@ -72,4 +72,28 @@ export class TransactionsListModel {
   getUniqueNames() {
     return this.transactionList.map(o => o.name).filter((v, i, a) => a.indexOf(v) === i);
   }
+
+  filterByName(name: string): Transaction[] {
+    return this.transactionList.filter(o => o.name === name);
+  }
+
+  getAmount(name: string): number {
+    const transactions = this.filterByName(name);
+    return transactions.reduce((prev, curr) => {
+      switch(curr.operation) {
+        case Operation.Buy:
+        case Operation.Get:  
+          return prev + curr.amount;
+          break;
+
+        case Operation.Send:
+        case Operation.Sell:
+          return prev - curr.amount;
+          break;
+
+        default:
+          return prev;
+      }      
+    }, 0);
+  }
 }

@@ -77,23 +77,45 @@ export class TransactionsListModel {
     return this.transactionList.filter(o => o.name === name);
   }
 
-  getAmount(name: string): number {
+  getAnalytic(name: string) {
     const transactions = this.filterByName(name);
-    return transactions.reduce((prev, curr) => {
-      switch(curr.operation) {
+    const analytic = {
+      amount: 0,      
+      cost: 0,
+      midPrice: 0,
+    };
+
+    transactions.forEach(t => {
+      switch(t.operation) {
         case Operation.Buy:
-        case Operation.Get:  
-          return prev + curr.amount;
+        case Operation.Get:          
+          analytic.amount += t.amount;
+
+          if (analytic.amount) {
+            analytic.cost += (t.price * t.amount);
+            analytic.midPrice = analytic.cost / analytic.amount;
+          } else {
+            analytic.cost = 0;
+            analytic.midPrice = 0;
+          }
+          
           break;
 
         case Operation.Send:
         case Operation.Sell:
-          return prev - curr.amount;
-          break;
+          analytic.amount -= t.amount;
 
-        default:
-          return prev;
+          if (analytic.amount) {
+            analytic.cost -= (analytic.midPrice * t.amount);            
+          } else {
+            analytic.cost = 0;
+            analytic.midPrice = 0;
+          }
+
+          break;
       }      
-    }, 0);
+    });
+
+    return analytic;
   }
 }

@@ -81,67 +81,72 @@ export class TransactionsListModel {
     return this.transactionList.filter((o) => o.name === name);
   }
 
-  getAnalytic(name: string) {
-    const transactions = this.filterByName(name);
-    const analytic = {
-      amount: 0,
-      buyAmount: 0,
-      cost: 0,
-      midPrice: 0,
-    };
+  getAnalytic() {    
+    let analytic = {};
 
-    transactions.forEach((t) => {
+    this.transactionList.forEach((t) => {
+      if (!analytic[t.name]) {
+        analytic[t.name] = {
+          amount: 0,
+          buyAmount: 0,
+          cost: 0,
+          midPrice: 0,
+        }
+      }
+
+      const analyticUnit = analytic[t.name];
+
       switch (t.operation) {
         case Operation.Buy:
-          analytic.amount += t.amount;
-          analytic.buyAmount += t.amount;
+          analyticUnit.amount += t.amount;
+          analyticUnit.buyAmount += t.amount;
 
-          if (analytic.amount) {
-            analytic.cost += t.price * t.amount;
-            analytic.midPrice = analytic.cost / analytic.buyAmount;
+          if (analyticUnit.amount) {
+            analyticUnit.cost += t.price * t.amount;
+            analyticUnit.midPrice = analyticUnit.cost / analyticUnit.buyAmount;
           } else {
-            analytic.cost = 0;
-            analytic.midPrice = 0;
+            analyticUnit.cost = 0;
+            analyticUnit.midPrice = 0;
           }
 
           break;
 
         case Operation.Sell:
-          analytic.amount -= t.amount;
+          analyticUnit.amount -= t.amount;
 
-          if (analytic.buyAmount >= t.amount) {
-            analytic.buyAmount -= t.amount;
+          if (analyticUnit.buyAmount >= t.amount) {
+            analyticUnit.buyAmount -= t.amount;
           } else {
-            analytic.buyAmount = 0;
+            analyticUnit.buyAmount = 0;
           }
           
 
-          if (analytic.amount) {
-            analytic.cost -= analytic.midPrice * t.amount;
-            analytic.midPrice = analytic.cost / analytic.buyAmount;
+          if (analyticUnit.amount) {
+            analyticUnit.cost -= analyticUnit.midPrice * t.amount;
+            analyticUnit.midPrice = analyticUnit.cost / analyticUnit.buyAmount;
           } else {
-            analytic.cost = 0;
-            analytic.midPrice = 0;
+            analyticUnit.cost = 0;
+            analyticUnit.midPrice = 0;
           }
 
           break;
 
         case Operation.Get:
-          analytic.amount += t.amount;
+          analyticUnit.amount += t.amount;
 
-          if (!analytic.amount) {
-            analytic.cost = 0;
-            analytic.midPrice = 0;
+          if (!analyticUnit.amount) {
+            analyticUnit.cost = 0;
+            analyticUnit.midPrice = 0;
           }
 
           break;
 
         case Operation.Send:
-          analytic.amount -= t.amount;
+          analyticUnit.amount -= t.amount;
 
-          if (!analytic.amount) {
-            analytic.cost = 0;
-            analytic.midPrice = 0;
+          if (!analyticUnit.amount) {
+            analyticUnit.cost = 0;
+            analyticUnit.midPrice = 0;
           }
 
           break;

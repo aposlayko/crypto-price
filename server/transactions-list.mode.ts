@@ -81,7 +81,7 @@ export class TransactionsListModel {
     return this.transactionList.filter((o) => o.name === name);
   }
 
-  getAnalytic() {    
+  getAnalytic(price: {[key: string]: number}) {    
     let analytic = {};
 
     this.transactionList.forEach((t) => {
@@ -91,10 +91,14 @@ export class TransactionsListModel {
           buyAmount: 0,
           cost: 0,
           midPrice: 0,
+          currentPrice: 0,
+          currentCost: 0,
+          profit: 0,
         }
       }
 
       const analyticUnit = analytic[t.name];
+      analyticUnit.currentPrice = price[t.name];
 
       switch (t.operation) {
         case Operation.Buy:
@@ -103,7 +107,6 @@ export class TransactionsListModel {
 
           if (analyticUnit.amount) {
             analyticUnit.cost += t.price * t.amount;
-            analyticUnit.midPrice = analyticUnit.cost / analyticUnit.buyAmount;
           } else {
             analyticUnit.cost = 0;
             analyticUnit.midPrice = 0;
@@ -123,7 +126,6 @@ export class TransactionsListModel {
 
           if (analyticUnit.amount) {
             analyticUnit.cost -= analyticUnit.midPrice * t.amount;
-            analyticUnit.midPrice = analyticUnit.cost / analyticUnit.buyAmount;
           } else {
             analyticUnit.cost = 0;
             analyticUnit.midPrice = 0;
@@ -150,7 +152,11 @@ export class TransactionsListModel {
           }
 
           break;
-      }
+        }
+      
+      analyticUnit.midPrice = analyticUnit.buyAmount ? analyticUnit.cost / analyticUnit.buyAmount : 0;
+      analyticUnit.currentCost = analyticUnit.amount * analyticUnit.currentPrice;
+      analyticUnit.profit = ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100;
     });
 
     return analytic;

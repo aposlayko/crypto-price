@@ -31,6 +31,18 @@ interface Transaction {
   date: Date;
 }
 
+interface Analytic {
+  [key: string]: {
+    amount: number;
+    buyAmount: number;
+    cost: number;
+    midPrice: number;
+    currentPrice: number;
+    currentCost: number;
+    profit: number;
+  };
+}
+
 export class TransactionsListModel {
   transactionList: Transaction[];
 
@@ -47,9 +59,9 @@ export class TransactionsListModel {
           let resultValue: any;
 
           if (schema[index] === TransactionProps.Price) {
-            resultValue = Number(value.replace(/\s/gi, "").replace(",", "."));
+            resultValue = TransactionsListModel.convertToNumber(value);
           } else if (schema[index] === TransactionProps.Amount) {
-            resultValue = Number(value.replace(/\s/gi, "").replace(",", "."));
+            resultValue = TransactionsListModel.convertToNumber(value);
           } else if (schema[index] === TransactionProps.Date) {
             const dateArr = value.split(".");
             resultValue = new Date(`${dateArr[1]}.${dateArr[0]}.${dateArr[2]}`);
@@ -81,7 +93,7 @@ export class TransactionsListModel {
     return this.transactionList.filter((o) => o.name === name);
   }
 
-  getAnalytic(price: {[key: string]: number}) {    
+  getAnalytic(price: {[key: string]: number}): Analytic {    
     let analytic = {};
 
     this.transactionList.forEach((t) => {
@@ -155,10 +167,38 @@ export class TransactionsListModel {
         }
       
       analyticUnit.midPrice = analyticUnit.buyAmount ? analyticUnit.cost / analyticUnit.buyAmount : 0;
-      analyticUnit.currentCost = analyticUnit.amount * analyticUnit.currentPrice;
+      analyticUnit.currentCost = analyticUnit.buyAmount * analyticUnit.currentPrice;
       analyticUnit.profit = ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100;
     });
 
     return analytic;
+  }
+
+  static transformAnalyticToTableFormat(analytic: Analytic): Array<Array<string>> {
+    const table: Array<Array<string>> = [['Актив', 'Количество', 'Текущая цена', 'Средняя цена', 'Текущая стоимость', 'Вложено', 'Доходность']];
+
+    for (let key in analytic) {
+      const row = [
+        key,
+        TransactionsListModel.convertToTextNumber(analytic[key].amount),
+        TransactionsListModel.convertToTextNumber(analytic[key].currentPrice),
+        TransactionsListModel.convertToTextNumber(analytic[key].midPrice),
+        TransactionsListModel.convertToTextNumber(analytic[key].currentCost),
+        TransactionsListModel.convertToTextNumber(analytic[key].cost),
+        TransactionsListModel.convertToTextNumber(analytic[key].profit),
+      ];
+
+      table.push(row);
+    }
+
+    return table;
+  }
+
+  static convertToNumber(value: string): number {
+    return Number(value.replace(/\s/gi, "").replace(",", "."));
+  }
+
+  static convertToTextNumber(value: number): string {
+    return value.toString().replace(".", ",");
   }
 }

@@ -33,6 +33,7 @@ router.post('/update', async (req, res) => {
   const tickerList = transactions.getUniqueNames();
   const coinInfo =  await CoinMarketCapService.getCoinInfo(tickerList);
   const analytic = transactions.getAnalytic(coinInfo);
+  await googleService.clearCells(SPREADSHEET_ID, ANALYTIC_TAB, ANALYTIC_RANGE);
   const isUpdated = await googleService.updateCells(SPREADSHEET_ID, ANALYTIC_TAB, ANALYTIC_RANGE, TransactionsListModel.transformAnalyticToTableFormat(analytic));
 
   res.json(isUpdated);

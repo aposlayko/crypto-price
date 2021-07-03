@@ -61,6 +61,28 @@ class GoogleService {
     });    
   }
 
+  clearCells(spreadsheetId: string, tab: string, range: string): Promise<any> {
+    const sheets = google.sheets({ version: 'v4' });
+
+    const request = {
+      range: `${tab}!${range}`,
+      spreadsheetId,
+      auth: this.oAuth2Client,      
+    }
+
+    return new Promise((resolve, reject) => {
+      sheets.spreadsheets.values.clear(request, (err, response) => {
+        if (err) {
+          console.log('Error while clear analytics');
+          reject(err)
+        } else {
+          console.log('Old analytics cleared');
+          resolve(response);
+        }
+      }); 
+    })      
+  }
+
   private authorize(clientId: string, clientSecret: string, redirectUrl: string): void {
     const oAuth2Client = new google.auth.OAuth2(
       clientId,

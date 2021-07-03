@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { google, sheets_v4 } from 'googleapis';
 import fs from 'fs';
 import readline from 'readline';
 import { config } from '../config';
@@ -7,19 +7,18 @@ import { OAuth2Client } from 'google-auth-library';
 class GoogleService {
   static SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
   static TOKEN_PATH = "token.json";
+
   oAuth2Client: OAuth2Client;
+  sheets: sheets_v4.Sheets;
 
   constructor() {
     this.authorize(config.client_id, config.client_secret, config.redirect_uris[0]);
   }
 
   getCells(spreadsheetId: string, tab: string, range: string): Promise<any[][]> {
-    return new Promise((resolve, reject) => {
-      const sheets = google.sheets({ version: 'v4' });  
-  
-      sheets.spreadsheets.values.get({
-        spreadsheetId,
-        auth: this.oAuth2Client,
+    return new Promise((resolve, reject) => {  
+      this.sheets.spreadsheets.values.get({
+        spreadsheetId,        
         range:  `${tab}!${range}`,
       }, (err, res) => {
         if (err) {
@@ -34,18 +33,15 @@ class GoogleService {
   }
 
   updateCells(spreadsheetId: string, tab: string, range: string, data: any[][]): Promise<boolean> {
-    const sheets = google.sheets({ version: 'v4' });
-
     const request = {
       resource: {values: data},
       range: `${tab}!${range}`,
-      spreadsheetId,
-      auth: this.oAuth2Client,
+      spreadsheetId,      
       valueInputOption: "USER_ENTERED",
     }
     
     return new Promise((resolve, reject) => {
-      sheets.spreadsheets.values.update(
+      this.sheets.spreadsheets.values.update(
         request,
         (err, response) => {
           if (err) {
@@ -62,16 +58,13 @@ class GoogleService {
   }
 
   clearCells(spreadsheetId: string, tab: string, range: string): Promise<any> {
-    const sheets = google.sheets({ version: 'v4' });
-
     const request = {
       range: `${tab}!${range}`,
-      spreadsheetId,
-      auth: this.oAuth2Client,      
+      spreadsheetId,        
     }
 
     return new Promise((resolve, reject) => {
-      sheets.spreadsheets.values.clear(request, (err, response) => {
+      this.sheets.spreadsheets.values.clear(request, (err, response) => {
         if (err) {
           console.log('Error while clear analytics');
           reject(err)
@@ -95,7 +88,8 @@ class GoogleService {
       if (err) return this.getNewToken(oAuth2Client);      
       
       oAuth2Client.setCredentials(JSON.parse(token as string));
-      this.oAuth2Client = oAuth2Client;      
+      this.oAuth2Client = oAuth2Client;  
+      this.sheets = google.sheets({ version: 'v4', auth: oAuth2Client });
     });
   }
 
@@ -119,6 +113,7 @@ class GoogleService {
         if (err) return console.error('Error while trying to retrieve access token', err);
         oAuth2Client.setCredentials(token);
         this.oAuth2Client = oAuth2Client;
+        this.sheets = google.sheets({ version: 'v4', auth: oAuth2Client });
         // Store the token to disk for later program executions
         fs.writeFile(GoogleService.TOKEN_PATH, JSON.stringify(token), (err) => {
           if (err) return console.error(err);

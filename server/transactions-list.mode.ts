@@ -43,6 +43,7 @@ interface Analytic {
     currentPrice: number;
     currentCost: number;
     profit: number;
+    profitPer: number;
   };
 }
 
@@ -109,6 +110,7 @@ export class TransactionsListModel {
           midPrice: 0,
           currentPrice: 0,
           currentCost: 0,
+          profitPer: 0,
           profit: 0,
         }
       }
@@ -173,7 +175,8 @@ export class TransactionsListModel {
       
       analyticUnit.midPrice = analyticUnit.buyAmount ? analyticUnit.cost / analyticUnit.buyAmount : 0;
       analyticUnit.currentCost = analyticUnit.buyAmount ? analyticUnit.buyAmount * analyticUnit.currentPrice : 0;
-      analyticUnit.profit = analyticUnit.cost ? ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100 : 0;
+      analyticUnit.profitPer = analyticUnit.cost ? ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100 : 0;
+      analyticUnit.profit = analyticUnit.currentCost - analyticUnit.cost;
     });
 
     return analytic = TransactionsListModel.removeEmptyAnalytic(analytic);
@@ -192,7 +195,7 @@ export class TransactionsListModel {
   }
 
   static transformAnalyticToTableFormat(analytic: Analytic): Array<Array<string>> {
-    const table: Array<Array<string>> = [['Актив', 'Название', 'Количество', 'Текущая цена', 'Средняя цена', 'Текущая стоимость', 'Вложено', 'Доходность']];
+    const table: Array<Array<string>> = [['Актив', 'Название', 'Количество', 'Текущая цена', 'Средняя цена', 'Текущая стоимость', 'Вложено', 'Доходность %', 'Доходность $']];
 
     for (let key in analytic) {
       const row = [
@@ -203,6 +206,7 @@ export class TransactionsListModel {
         TransactionsListModel.convertToTextNumber(analytic[key].midPrice),
         TransactionsListModel.convertToTextNumber(analytic[key].currentCost),
         TransactionsListModel.convertToTextNumber(analytic[key].cost),
+        TransactionsListModel.convertToTextNumber(analytic[key].profitPer),
         TransactionsListModel.convertToTextNumber(analytic[key].profit),
       ];
 

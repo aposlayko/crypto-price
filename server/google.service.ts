@@ -26,7 +26,7 @@ class GoogleService {
           console.log('The API returned an error: ' + err);
           reject(err);
         } else {
-          console.log('Tickers loaded from ' + tab);
+          console.log(tab + ' tab fetched');
           resolve(res.data.values);      
         }
       });
@@ -52,7 +52,7 @@ class GoogleService {
             console.error(err);
             reject(err);
           } else {
-            console.log('Prices updated!', new Date());
+            console.log(tab + ' tab updated!', new Date());
             console.log(' ');
             resolve(true);
           }

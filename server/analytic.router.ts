@@ -11,8 +11,9 @@ const PRICE_RANGE = 'D2:D39';
 const SPREADSHEET_ID = '17D4eYUyrYZepfIx85B2_R6ccU9GocaVyEBsCyKoHUJ8';
 
 const TRANSACTION_TAB = 'Transactions';
+const ANALYTIC_TAB = 'Analytic';
 const TRANSACTION_RANGE = 'A2:E'
-const ANALYTIC_RANGE = 'H1:P';
+const ANALYTIC_RANGE = 'A1:H';
 
 router.post('/update-old', async (req: any, res: any) => {
   const response = await googleService.getCells(SPREADSHEET_ID, TAB, TICKER_RANGE);
@@ -32,7 +33,7 @@ router.post('/update', async (req, res) => {
   const tickerList = transactions.getUniqueNames();
   const coinInfo =  await CoinMarketCapService.getCoinInfo(tickerList);
   const analytic = transactions.getAnalytic(coinInfo);
-  const isUpdated = await googleService.updateCells(SPREADSHEET_ID, TRANSACTION_TAB, ANALYTIC_RANGE, TransactionsListModel.transformAnalyticToTableFormat(analytic));
+  const isUpdated = await googleService.updateCells(SPREADSHEET_ID, ANALYTIC_TAB, ANALYTIC_RANGE, TransactionsListModel.transformAnalyticToTableFormat(analytic));
 
   res.json(isUpdated);
 })

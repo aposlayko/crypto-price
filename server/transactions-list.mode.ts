@@ -1,3 +1,5 @@
+import { CoinsInfo } from "./coinmarketcap.service";
+
 const SCHEMA = [];
 
 enum Operation {
@@ -33,6 +35,7 @@ interface Transaction {
 
 interface Analytic {
   [key: string]: {
+    name: string;
     amount: number;
     buyAmount: number;
     cost: number;
@@ -93,12 +96,13 @@ export class TransactionsListModel {
     return this.transactionList.filter((o) => o.name === name);
   }
 
-  getAnalytic(price: {[key: string]: number}): Analytic {    
-    let analytic = {};
+  getAnalytic(coinInfo: CoinsInfo): Analytic {    
+    let analytic: Analytic = {};
 
     this.transactionList.forEach((t) => {
       if (!analytic[t.name]) {
         analytic[t.name] = {
+          name: '',
           amount: 0,
           buyAmount: 0,
           cost: 0,
@@ -110,7 +114,8 @@ export class TransactionsListModel {
       }
 
       const analyticUnit = analytic[t.name];
-      analyticUnit.currentPrice = price[t.name];
+      analyticUnit.name = coinInfo[t.name].name;
+      analyticUnit.currentPrice = coinInfo[t.name].price;
 
       switch (t.operation) {
         case Operation.Buy:
@@ -167,19 +172,32 @@ export class TransactionsListModel {
         }
       
       analyticUnit.midPrice = analyticUnit.buyAmount ? analyticUnit.cost / analyticUnit.buyAmount : 0;
-      analyticUnit.currentCost = analyticUnit.buyAmount * analyticUnit.currentPrice;
-      analyticUnit.profit = ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100;
+      analyticUnit.currentCost = analyticUnit.buyAmount ? analyticUnit.buyAmount * analyticUnit.currentPrice : 0;
+      analyticUnit.profit = analyticUnit.cost ? ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100 : 0;
     });
 
-    return analytic;
+    return analytic = TransactionsListModel.removeEmptyAnalytic(analytic);
+  }
+
+  static removeEmptyAnalytic(analytic: Analytic): Analytic {
+    const newAnalytic = {};
+
+    for (let key in analytic) {
+      if (analytic[key].amount) {
+        newAnalytic[key] = analytic[key];
+      }
+    }
+
+    return newAnalytic;
   }
 
   static transformAnalyticToTableFormat(analytic: Analytic): Array<Array<string>> {
-    const table: Array<Array<string>> = [['Актив', 'Количество', 'Текущая цена', 'Средняя цена', 'Текущая стоимость', 'Вложено', 'Доходность']];
+    const table: Array<Array<string>> = [['Актив', 'Название', 'Количество', 'Текущая цена', 'Средняя цена', 'Текущая стоимость', 'Вложено', 'Доходность']];
 
     for (let key in analytic) {
       const row = [
         key,
+        analytic[key].name,
         TransactionsListModel.convertToTextNumber(analytic[key].amount),
         TransactionsListModel.convertToTextNumber(analytic[key].currentPrice),
         TransactionsListModel.convertToTextNumber(analytic[key].midPrice),

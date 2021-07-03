@@ -1,11 +1,17 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { config } from "../config";
 
+export interface CoinsInfo {
+  [key: string]: {
+    name: string;
+    price: number;
+  }
+}
 export class CoinMarketCapService {
   static API_KEY: string = config.coinmarketcapApiKey;
   static DEFAULT_CURRENCY: string = 'USD';
 
-  static getCoinInfo(cryptoList = ['BTC', 'BNB']): Promise<any> {
+  static getCoinInfo(cryptoList = ['BTC', 'BNB']): Promise<CoinsInfo> {
     return new Promise((resolve, reject) => {
       const options: AxiosRequestConfig = {
         method: 'GET',
@@ -15,22 +21,25 @@ export class CoinMarketCapService {
       };
         
       axios(options).then(response => {
-        const info = {};            
+        const info: CoinsInfo = {};            
             
         if (response?.data?.data) {
           const data = response.data.data;      
-      
+                    
           for (let key in data) {        
             if (data[key]) {              
-              info[key] = data[key].quote[CoinMarketCapService.DEFAULT_CURRENCY].price;
+              info[key] = {
+                name: data[key].name,
+                price: data[key].quote[CoinMarketCapService.DEFAULT_CURRENCY].price,
+              }
             }
           }
       
-          console.log('Prices loaded from coinmarketcap');
+          console.log('Coinmarketcap info loaded');
           resolve(info);  
         }   
       }).catch((err) => {
-        console.log('API call error:', err.message);
+        console.log('Coinmarketcap API call error:', err.message);
         reject(err);
       });
     });

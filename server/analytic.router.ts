@@ -2,6 +2,7 @@ import express, { RequestHandler } from 'express';
 import { CoinMarketCapService } from './coinmarketcap.service';
 import { googleService } from './google.service';
 import { TransactionsListModel } from './transactions-list.mode';
+import { hystoricalData } from './hystirical-data.service';
 
 export const router = express.Router();
 
@@ -37,4 +38,9 @@ router.post('/update', async (req, res) => {
   const isUpdated = await googleService.updateCells(SPREADSHEET_ID, ANALYTIC_TAB, ANALYTIC_RANGE, TransactionsListModel.transformAnalyticToTableFormat(analytic));
 
   res.json(isUpdated);
-})
+});
+
+router.post('/download-hystorical-data', async (req, res) => {
+  const result = await hystoricalData.getChunk();
+  res.json({result});
+});

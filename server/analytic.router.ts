@@ -41,6 +41,6 @@ router.post('/update', async (req, res) => {
 });
 
 router.post('/download-hystorical-data', async (req, res) => {
-  const result = await hystoricalData.getChunk();
+  const result = await hystoricalData.getData();
   res.json({result});
 });

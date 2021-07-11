@@ -1,8 +1,36 @@
 import axios, { AxiosRequestConfig } from "axios";
 import AdmZip from "adm-zip";
 import fs from "fs";
-import path from 'path';
+import path from "path";
 
+class DateInterval {
+  month: number;
+  year: number;
+
+  constructor() {
+    const now = new Date();
+    this.year = now.getFullYear();
+    this.month = now.getMonth();
+  }
+
+  toPrevMonth() {
+    if (this.month) {
+      this.month -= 1;
+    } else {
+      this.month = 11;
+      this.year -= 1;
+    }
+  }
+
+  getYear(): string {
+    return this.year.toString();
+  }
+
+  getMonth(): string {
+    const result = this.month + 1;
+    return result < 10 ? '0' + result : result.toString();
+  }
+}
 class HystoricalData {
   static DIR_PATH = path.join(__dirname, "../hystorical_data");
 
@@ -13,33 +41,35 @@ class HystoricalData {
   }
 
   async getData(): Promise<string> {
-    const name = "BNBUSDT";
+    const tikerName = "BNBUSDT";
     const interval = "1d";
-    const fileName = `${name}-${interval}.csv`;
+    const fileName = `${tikerName}-${interval}.csv`;
     const filePath = `${HystoricalData.DIR_PATH}/${fileName}`;
+    const dateInterval = new DateInterval();
 
+    dateInterval.toPrevMonth();
+    
     await this.removeFile(filePath);
 
-    await this.getChunk(
-      "https://data.binance.vision/data/spot/monthly/klines/BNBUSDT/1d/BNBUSDT-1d-2019-01.zip",
-      filePath
-    );
-    await this.getChunk(
-      "https://data.binance.vision/data/spot/monthly/klines/BNBUSDT/1d/BNBUSDT-1d-2019-02.zip",
-      filePath
-    );
-    return await this.getChunk(
-      "https://data.binance.vision/data/spot/monthly/klines/BNBUSDT/1d/BNBUSDT-1d-2019-03.zip",
-      filePath
-    );
+    return await this.getChunk(tikerName, interval, dateInterval, filePath);
   }
 
-  async getChunk(url: string, filePath: string): Promise<string> {
+  async getChunk(
+    tikerName: string,
+    interval: string,
+    dateInterval: DateInterval,
+    filePath: string
+  ): Promise<string> {    
     // https://data.binance.vision/data/spot/monthly/klines/BNBUSDT/1m/BNBUSDT-1m-2019-01.zip
+    const url = `https://data.binance.vision/data/spot/monthly/klines/${tikerName}/${interval}/${tikerName}-${interval}-${dateInterval.getYear()}-${dateInterval.getMonth()}.zip`;
+    
+    console.log('Loading: ', url);
+    
     const response = await this.loadData(url);
     const unzipedContent = this.unzipFirstFile(response);
     await this.appenToFile(unzipedContent, filePath);
-
+    dateInterval.toPrevMonth();
+        
     return "chuks loaded";
   }
 
@@ -60,8 +90,7 @@ class HystoricalData {
           }
         })
         .catch((err) => {
-          console.log("Error while loading data", err);
-          reject(err);
+          reject("Error while loading data");
         });
     });
   }

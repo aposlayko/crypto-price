@@ -41,6 +41,10 @@ router.post('/update', async (req, res) => {
 });
 
 router.post('/download-hystorical-data', async (req, res) => {
-  const result = await hystoricalData.getData();
-  res.json({result});
+  try {
+    hystoricalData.getData();    
+  } catch (err) {
+    console.log(err);    
+  }
+  res.json({result: 'Loading...'});
 });

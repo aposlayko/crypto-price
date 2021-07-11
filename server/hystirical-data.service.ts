@@ -46,7 +46,7 @@ class HystoricalData {
     }
     const tikerName = tiker.toUpperCase();
     const intervalValue = interval.toLowerCase();
-    const fileName = `${tiker}-${interval}.csv`;
+    const fileName = `${tikerName}-${intervalValue}.csv`;
     const filePath = `${HystoricalData.DIR_PATH}/${fileName}`;
     const dateInterval = new DateInterval();
 
@@ -70,7 +70,8 @@ class HystoricalData {
     
     const response = await this.loadData(url);
     const unzipedContent = this.unzipFirstFile(response);
-    await this.appenToFile(unzipedContent, filePath);
+    const reversedContent = this.reverse(unzipedContent);
+    await this.appenToFile(reversedContent, filePath);
 
     dateInterval.toPrevMonth();
         
@@ -99,6 +100,12 @@ class HystoricalData {
     });
   }
 
+  reverse(csv: Buffer): Buffer {
+    const csvStr = csv.toString().split('\n').reverse().join('\n');
+
+    return Buffer.from(csvStr);
+  }
+ 
   unzipFirstFile(zipFile: Buffer): Buffer {
     const zip = new AdmZip(zipFile);
     const zipEntries = zip.getEntries();

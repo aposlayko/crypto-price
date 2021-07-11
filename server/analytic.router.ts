@@ -40,10 +40,14 @@ router.post('/update', async (req, res) => {
   res.json(isUpdated);
 });
 
-router.post('/download-hystorical-data', (req, res) => {
+router.post('/download-hystorical-data', (req, res) => {  
+  const {interval, tiker} = req.body;
+
+  const message = `Loading ${tiker} hystirical data with ${interval} interval...`;
+  console.log(message);
   
-  const getData = hystoricalData.getData();
+  const getData = hystoricalData.getData(tiker, interval);
   getData.catch((err) => console.log(err));
   
-  res.json({result: 'Loading...'});
+  res.json({message});
 });

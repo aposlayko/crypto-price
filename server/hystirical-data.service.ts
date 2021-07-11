@@ -40,10 +40,13 @@ class HystoricalData {
     }
   }
 
-  async getData(): Promise<string> {
-    const tikerName = "BNBUSDT";
-    const interval = "1d";
-    const fileName = `${tikerName}-${interval}.csv`;
+  async getData(tiker: string, interval: string): Promise<string> {
+    if (!tiker || !interval) {
+      throw 'missing parameters';
+    }
+    const tikerName = tiker.toUpperCase();
+    const intervalValue = interval.toLowerCase();
+    const fileName = `${tiker}-${interval}.csv`;
     const filePath = `${HystoricalData.DIR_PATH}/${fileName}`;
     const dateInterval = new DateInterval();
 
@@ -51,7 +54,7 @@ class HystoricalData {
     
     await this.removeFile(filePath);
 
-    return await this.getChunk(tikerName, interval, dateInterval, filePath);
+    return await this.getChunk(tikerName, intervalValue, dateInterval, filePath);
   }
 
   async getChunk(
@@ -68,6 +71,7 @@ class HystoricalData {
     const response = await this.loadData(url);
     const unzipedContent = this.unzipFirstFile(response);
     await this.appenToFile(unzipedContent, filePath);
+
     dateInterval.toPrevMonth();
         
     return await this.getChunk(tikerName, interval, dateInterval, filePath);

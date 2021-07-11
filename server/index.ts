@@ -7,7 +7,7 @@ const port = 3000;
 
 console.log(path.join(__dirname, 'assets'));
 
-
+app.use(express.json());
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '../client/templates'));
 

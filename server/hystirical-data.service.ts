@@ -70,7 +70,7 @@ class HystoricalData {
     await this.appenToFile(unzipedContent, filePath);
     dateInterval.toPrevMonth();
         
-    return "chuks loaded";
+    return await this.getChunk(tikerName, interval, dateInterval, filePath);
   }
 
   loadData(url: string): Promise<Buffer> {
@@ -90,7 +90,7 @@ class HystoricalData {
           }
         })
         .catch((err) => {
-          reject("Error while loading data");
+          reject("Error while loading data, probably data ends");
         });
     });
   }
@@ -124,6 +124,7 @@ class HystoricalData {
     return new Promise((resolve, reject) => {
       if (!fs.existsSync(path)) {
         resolve(true);
+        return;
       }
 
       fs.unlink(path, (err) => {

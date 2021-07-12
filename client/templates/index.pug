@@ -2,12 +2,11 @@ header
     title My magic app
    
 body
-    h1 Push the button
-    
+    h1 Analytics    
     p
-        button#analytic-btn Analytic Button
-    p 
-        button#download-hystorycal-data Download hystorycal data
+        button#analytic-btn Update analytic
+    
+    h1 Hystirical data
     p 
         input(
             id='tiker-input'
@@ -21,5 +20,12 @@ body
             type='text'
             placeholder='Interval'
         )
+    p 
+        button#download-hystorycal-data Download hystorycal data
+
+    h1 Algo machine 
+      p 
+        button#start-algo-machine Start algo machine 
+
     script(src='https://unpkg.com/axios/dist/axios.min.js') 
     script(src='../assets/main.js')

@@ -4,6 +4,8 @@ const downloadHystoricalDataBtn = document.getElementById("download-hystorycal-d
 const tikerInput = document.getElementById("tiker-input");
 const intervalInput = document.getElementById("interval-input");
 
+const startAlgoMachineBtn = document.getElementById("start-algo-machine");
+
 analyticBtn.addEventListener("click", () => {
   axios
     .post("/update-analytics/update")
@@ -20,11 +22,14 @@ downloadHystoricalDataBtn.addEventListener("click", () => {
   const interval = intervalInput.value
 
   axios
-    .post("/update-analytics/download-hystorical-data", {tiker, interval})
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    .post("/algo-machine/download-hystorical-data", {tiker, interval})
+    .then((response) => console.log(response.data))
+    .catch((err) => console.log(err));
+});
+
+startAlgoMachineBtn.addEventListener("click", () => {
+  axios
+    .post("/algo-machine/start")
+    .then((response) => console.log(response.data))
+    .catch((err) => console.log(err));
 });

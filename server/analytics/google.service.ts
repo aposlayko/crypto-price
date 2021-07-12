@@ -1,7 +1,7 @@
 import { google, sheets_v4 } from 'googleapis';
 import fs from 'fs';
 import readline from 'readline';
-import { config } from '../config';
+import { config } from '../../config';
 import { OAuth2Client } from 'google-auth-library';
 
 class GoogleService {

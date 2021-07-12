@@ -1,6 +1,7 @@
 import express from 'express'
 import path from 'path';
-import { router } from './analytic.router';
+import { algoMachineRouter } from './algo-machine/algo-machine.router';
+import { analyticsRouter } from './analytics/analytic.router';
 
 const app = express();
 const port = 3000;
@@ -13,7 +14,10 @@ app.set('views', path.join(__dirname, '../client/templates'));
 
 app.use('/assets', express.static(path.join(__dirname, '../client/assets')));
 
-app.use('/update-analytics', router);
+// ROUTER SECTION
+app.use('/update-analytics', analyticsRouter);
+app.use('/algo-machine', algoMachineRouter);
+
 
 app.get('/', (request, response) => {
     response.render('index');

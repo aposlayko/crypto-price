@@ -2,9 +2,8 @@ import express from 'express';
 import { CoinMarketCapService } from './coinmarketcap.service';
 import { googleService } from './google.service';
 import { TransactionsListModel } from './transactions-list.mode';
-import { hystoricalData } from './hystirical-data.service';
 
-export const router = express.Router();
+export const analyticsRouter = express.Router();
 
 const SPREADSHEET_ID = '17D4eYUyrYZepfIx85B2_R6ccU9GocaVyEBsCyKoHUJ8';
 
@@ -13,7 +12,7 @@ const ANALYTIC_TAB = 'Analytic';
 const TRANSACTION_RANGE = 'A2:E'
 const ANALYTIC_RANGE = 'A1:I';
 
-router.post('/update', async (req, res) => {
+analyticsRouter.post('/update', async (req, res) => {
   const response = await googleService.getCells(SPREADSHEET_ID, TRANSACTION_TAB, TRANSACTION_RANGE);
   const transactions = new TransactionsListModel(response);
   const tickerList = transactions.getUniqueNames();
@@ -25,14 +24,3 @@ router.post('/update', async (req, res) => {
   res.json(isUpdated);
 });
 
-router.post('/download-hystorical-data', (req, res) => {  
-  const {interval, tiker} = req.body;
-
-  const message = `Loading ${tiker} hystirical data with ${interval} interval...`;
-  console.log(message);
-  
-  const getData = hystoricalData.getData(tiker, interval);
-  getData.catch((err) => console.log(err));
-  
-  res.json({message});
-});

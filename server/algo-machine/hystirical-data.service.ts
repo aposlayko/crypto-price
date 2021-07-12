@@ -32,7 +32,7 @@ class DateInterval {
   }
 }
 class HystoricalData {
-  static DIR_PATH = path.join(__dirname, "../hystorical_data");
+  static DIR_PATH = path.join(__dirname, "../../hystorical_data");
 
   constructor() {
     if (!fs.existsSync(HystoricalData.DIR_PATH)) {

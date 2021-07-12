@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { config } from "../config";
+import { config } from "../../config";
 
 export interface CoinsInfo {
   [key: string]: {

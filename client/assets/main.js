@@ -4,6 +4,8 @@ const downloadHystoricalDataBtn = document.getElementById("download-hystorycal-d
 const tikerInput = document.getElementById("tiker-input");
 const intervalInput = document.getElementById("interval-input");
 
+const fileNameSelect = document.getElementById("files-list-select");
+const delayInput = document.getElementById("delay-input");
 const startAlgoMachineBtn = document.getElementById("start-algo-machine");
 
 analyticBtn.addEventListener("click", () => {
@@ -28,8 +30,11 @@ downloadHystoricalDataBtn.addEventListener("click", () => {
 });
 
 startAlgoMachineBtn.addEventListener("click", () => {
+  const fileName = fileNameSelect.value;
+  const delay = delayInput.value;
+
   axios
-    .post("/algo-machine/start")
+    .post("/algo-machine/start", {fileName, delay})
     .then((response) => console.log(response.data))
     .catch((err) => console.log(err));
 });

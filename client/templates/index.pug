@@ -24,7 +24,19 @@ body
         button#download-hystorycal-data Download hystorycal data
 
     h1 Algo machine 
-      p 
+
+    p 
+        select#files-list-select
+            each val in fileNames
+                option(value=val)= val
+            
+    p 
+        input#delay-input(
+            type="number"
+            placeholder='Delay in seconds'
+            value='0.5'
+        )  
+    p 
         button#start-algo-machine Start algo machine 
 
     script(src='https://unpkg.com/axios/dist/axios.min.js') 

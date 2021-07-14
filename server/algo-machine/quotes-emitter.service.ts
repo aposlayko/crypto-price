@@ -1,4 +1,8 @@
 import { EventEmitter } from "stream";
+import fs from "fs";
+import { hystoricalData } from "./hystirical-data.service";
+import path from "path";
+import readline from "readline";
 
 export enum QuotesDataType {
   File,
@@ -28,9 +32,20 @@ export class QuotesEmitterService {
     return this.emitter;
   }
 
-  private runFileEmitter(path: string, delayInSec: number): void {
-    setInterval(() => {
-      
-    }, delayInSec * 1000);
+  private runFileEmitter(fileName: string, delayInSec: number): void {
+    const fileStream = fs.createReadStream(
+      path.join(hystoricalData.getFolderPath(), '/' + fileName)
+    );
+
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity
+    });
+
+    rl.on('line', (line) => {
+      this.emitter.emit('new-quote', line);
+    }).on('close', () => {
+      this.emitter.emit('close');        
+    });
   }
 }

@@ -152,6 +152,12 @@ class HystoricalData {
   getFileNameList(): string[] {
     return fs.readdirSync(HystoricalData.DIR_PATH);
   }
+
+  getFolderPath(): string {
+    return HystoricalData.DIR_PATH;
+  }
 }
+
+
 
 export const hystoricalData = new HystoricalData();

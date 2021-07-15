@@ -1,7 +1,9 @@
 import express from 'express';
 import path from "path";
+import { AlgoMachine } from './algo-machine.model';
 import { hystoricalData } from './hystirical-data.service';
 import { QuoteList } from './quote-list.model';
+import { Quote } from './quote.model';
 import { QuotesDataType, QuotesEmitterService } from './quotes-emitter.service';
 
 export const algoMachineRouter = express.Router();
@@ -19,8 +21,7 @@ algoMachineRouter.post('/download-hystorical-data', (req, res) => {
 });
 
 algoMachineRouter.post('/start', (req, res) => {
-  const {fileName, delay} = req.body;
-  const quoteList = new QuoteList();
+  const {fileName, delay} = req.body;  
   
   const quotesEmitter = new QuotesEmitterService({
     delay: Number(delay),
@@ -28,13 +29,9 @@ algoMachineRouter.post('/start', (req, res) => {
     type: QuotesDataType.File
   });
 
-  quotesEmitter.start()
-    .on("new-quote", (quoteStr: string) => {
-      quoteList.addFromStr(quoteStr);
-    })
-    .on("close", () => {
-      console.log(quoteList.reverse());
-    });
+  const algoMachine = new AlgoMachine({
+    emitter: quotesEmitter,
+  }).start();
 
   res.json({ message: "Algo machiine is here" });
 });

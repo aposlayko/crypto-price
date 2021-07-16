@@ -1,3 +1,6 @@
+import { Quote } from "../quote.model";
+
 export abstract class AbstractRule {
-  abstract check: () => boolean;
+  abstract update(quote: Quote): void;
+  abstract check(): boolean;
 }

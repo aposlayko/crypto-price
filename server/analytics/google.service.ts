@@ -22,13 +22,36 @@ class GoogleService {
         range:  `${tab}!${range}`,
       }, (err, res) => {
         if (err) {
-          console.log('The API returned an error: ' + err);
-          reject(err);
+          const authUrl = this.handleInvalidGrantError(err.message);
+          console.log('The API returned an error: ' + err.message);
+          reject({authUrl} || err);
         } else {
           console.log(tab + ' tab fetched');
           resolve(res.data.values);      
         }
       });
+    });
+  }
+
+  private handleInvalidGrantError(errorMessage: string) {
+    if (errorMessage === 'invalid_grant') {
+      return this.oAuth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: GoogleService.SCOPES,
+      });
+    }
+  }
+
+  refreshToken(code: string) {
+    this.oAuth2Client.getToken(code, (err, token) => {
+      if (err) return console.error('Error while trying to retrieve access token', err);
+      this.oAuth2Client.setCredentials(token);      
+      
+      // Store the token to disk for later program executions
+      fs.writeFile(GoogleService.TOKEN_PATH, JSON.stringify(token), (err) => {
+        if (err) return console.error(err);
+        console.log('Token stored to', GoogleService.TOKEN_PATH);
+      });        
     });
   }
 

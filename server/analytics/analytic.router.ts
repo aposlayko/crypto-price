@@ -12,6 +12,10 @@ const ANALYTIC_TAB = 'Analytic';
 const TRANSACTION_RANGE = 'A2:E'
 const ANALYTIC_RANGE = 'A1:I';
 
+analyticsRouter.get('/', (req, res) => {
+  res.render('update-analytics');
+});
+
 analyticsRouter.post('/update', async (req, res) => {
   try {
     const response = await googleService.getCells(SPREADSHEET_ID, TRANSACTION_TAB, TRANSACTION_RANGE);

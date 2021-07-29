@@ -2,43 +2,13 @@ header
     title My magic app
    
 body
-    h1 Analytics    
-    p
-        button#analytic-btn Update analytic
-    p#analytic-status
+    ul 
+      li 
+        a(href="/update-analytics") Update analytics
+
+      li 
+        a(href="/algo-machine") Algo machine
+
+    block content 
+
     
-    h1 Hystirical data
-    p 
-        input(
-            id='tiker-input'
-            type='text'
-            placeholder='Tiker'
-        )
-
-    p 
-        input(
-            id='interval-input'
-            type='text'
-            placeholder='Interval'
-        )
-    p 
-        button#download-hystorycal-data Download hystorycal data
-
-    h1 Algo machine 
-
-    p 
-        select#files-list-select
-            each val in fileNames
-                option(value=val)= val
-            
-    p 
-        input#delay-input(
-            type="number"
-            placeholder='Delay in seconds'
-            value='0.5'
-        )  
-    p 
-        button#start-algo-machine Start algo machine 
-
-    script(src='https://unpkg.com/axios/dist/axios.min.js') 
-    script(src='../assets/main.js')

@@ -1,7 +1,6 @@
 import express from 'express'
 import path from 'path';
 import { algoMachineRouter } from './algo-machine/algo-machine.router';
-import { hystoricalData } from './algo-machine/hystirical-data.service';
 import { analyticsRouter } from './analytics/analytic.router';
 
 const app = express();
@@ -21,6 +20,6 @@ app.use('/algo-machine', algoMachineRouter);
 
 
 app.get('/', (request, response) => {
-    response.render('index', {fileNames: hystoricalData.getFileNameList()});
+    response.redirect('/update-analytics');
 });
 app.listen(port, () => console.log(`Running on http://localhost:${port}`));

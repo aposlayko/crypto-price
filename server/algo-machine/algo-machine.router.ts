@@ -8,6 +8,10 @@ import { QuotesDataType, QuotesEmitterService } from './quotes-emitter.service';
 
 export const algoMachineRouter = express.Router();
 
+algoMachineRouter.get('/', (req, res) => {
+  res.render('algo-machine', {fileNames: hystoricalData.getFileNameList()});
+});
+
 algoMachineRouter.post('/download-hystorical-data', (req, res) => {  
   const {interval, tiker} = req.body;
 

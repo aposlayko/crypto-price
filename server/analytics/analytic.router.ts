@@ -36,6 +36,6 @@ analyticsRouter.get('/refresh_token', (req, res) => {
 });
 
 analyticsRouter.post('/refresh_token', (req, res) => {
-  console.log(req.body.code);
+  googleService.refreshToken(req.body.code);
   res.json(true);  
 });

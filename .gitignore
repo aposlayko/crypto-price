@@ -1,6 +1,7 @@
 /node_modules
 /dist
 /hystorical_data
+/temp_hystorical_data
 
 # IDE - VSCode
 .vscode/*

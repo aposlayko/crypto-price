@@ -74,8 +74,13 @@ class HystoricalData {
     
     try {
       const response = await this.loadData(url);
-      const unzipedContent = this.unzipFirstFile(response);
-      await this.appenToFile(unzipedContent, tempFilePath);
+      const unzipedContent = this.filterByRange(
+        String(this.unzipFirstFile(response)),
+         dateInterval.dateStart,
+        dateInterval.dateEnd,
+      );
+
+      await this.appendToFile(unzipedContent, tempFilePath);
     } catch(err) {
       return new Promise((res, rej) => res(filePathes));
     }
@@ -83,7 +88,7 @@ class HystoricalData {
     filePathes.push(tempFilePath);
 
     if (dateInterval.toPrevMonth()) {
-      throw 'Out of range';
+      return new Promise((res, rej) => res(filePathes));
     }
         
     return await this.getChunk(tikerName, interval, dateInterval, filePathes);
@@ -111,6 +116,14 @@ class HystoricalData {
     });
   }
 
+  filterByRange(data: string, dateStart: Date, dateEnd: Date): string {
+    return data.split('\n').filter(str => {
+      const date = new Date(Number(str.split(',')[0]));
+            
+      return date <= dateStart && date >= dateEnd;
+    }).join('\n');
+  }
+
   unzipFirstFile(zipFile: Buffer): Buffer {
     const zip = new AdmZip(zipFile);
     const zipEntries = zip.getEntries();
@@ -120,18 +133,20 @@ class HystoricalData {
 
   async joinFiles(mainFilePath: string, tempFilePathes: string[]): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
+      const writeStream = fs.createWriteStream(mainFilePath);
       tempFilePathes.reverse();
 
-      for(const path of tempFilePathes) {
-        const data = await this.readFromFile(path);
-        await this.appenToFile(data, mainFilePath);
+      for (const path of tempFilePathes) {
+        const data = await this.readFromFile(path);        
+        writeStream.write(data);
       }
+      writeStream.end();
 
       resolve(true);
     });
   }
 
-  appenToFile(content: Buffer, path: string): Promise<boolean> {
+  appendToFile(content: Buffer | string, path: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       fs.writeFile(
         path,

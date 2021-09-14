@@ -7,13 +7,30 @@ block content
                 id='tiker-input'
                 type='text'
                 placeholder='Tiker'
+                value='BTCUSDT'
             )
+        p 
+            labvel Date start 
+                input(
+                    id='date-start'
+                    type='date'
+                    placeholder='Date start'
+                    value='2020'
+                )
+        p 
+            label Date end 
+                input(
+                    id='date-end'
+                    type='date'
+                    placeholder='Date end'
+                    value='2021'
+                )
 
         p 
             input(
                 id='interval-input'
                 type='text'
-                placeholder='Interval'
+                placeholder='Interval (exmp: 1d or 5m)'
             )
         p 
             button#download-hystorycal-data Download hystorycal data

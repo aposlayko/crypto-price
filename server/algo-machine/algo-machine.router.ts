@@ -13,12 +13,12 @@ algoMachineRouter.get('/', (req, res) => {
 });
 
 algoMachineRouter.post('/download-hystorical-data', (req, res) => {  
-  const {interval, tiker} = req.body;
+  const {interval, tiker, dateStart, dateEnd} = req.body;
 
-  const message = `Loading ${tiker} hystirical data with ${interval} interval...`;
+  const message = `Loading ${tiker} hystirical data with ${interval} interval from ${dateStart} to ${dateEnd}...`;
   console.log(message);
   
-  const getData = hystoricalData.getData(tiker, interval);
+  const getData = hystoricalData.getData(tiker, interval, dateStart, dateEnd);
   getData.catch((err) => console.log(err));
   
   res.json({message});

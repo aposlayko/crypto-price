@@ -10,7 +10,7 @@ const SPREADSHEET_ID = '17D4eYUyrYZepfIx85B2_R6ccU9GocaVyEBsCyKoHUJ8';
 const TRANSACTION_TAB = 'Transactions';
 const ANALYTIC_TAB = 'Analytic';
 const TRANSACTION_RANGE = 'A2:E'
-const ANALYTIC_RANGE = 'A1:I';
+const ANALYTIC_RANGE = 'A1:K';
 
 analyticsRouter.get('/', (req, res) => {
   res.render('update-analytics');

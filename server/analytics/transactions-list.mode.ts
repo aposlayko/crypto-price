@@ -44,6 +44,8 @@ interface Analytic {
     currentCost: number;
     profit: number;
     profitPer: number;
+    lastActionPrice: number;
+    percentFromLastAction: number;
   };
 }
 
@@ -112,6 +114,8 @@ export class TransactionsListModel {
           currentCost: 0,
           profitPer: 0,
           profit: 0,
+          lastActionPrice: 0,
+          percentFromLastAction: 0
         }
       }
 
@@ -126,9 +130,12 @@ export class TransactionsListModel {
 
           if (analyticUnit.amount) {
             analyticUnit.cost += t.price * t.amount;
+            analyticUnit.lastActionPrice = t.price;
           } else {
             analyticUnit.cost = 0;
             analyticUnit.midPrice = 0;
+            analyticUnit.lastActionPrice = 0;
+            analyticUnit.percentFromLastAction = 0;
           }
 
           break;
@@ -145,9 +152,12 @@ export class TransactionsListModel {
 
           if (analyticUnit.amount) {
             analyticUnit.cost -= analyticUnit.midPrice * t.amount;
+            analyticUnit.lastActionPrice = t.price;
           } else {
             analyticUnit.cost = 0;
             analyticUnit.midPrice = 0;
+            analyticUnit.lastActionPrice = 0;
+            analyticUnit.percentFromLastAction = 0;
           }
 
           break;
@@ -177,6 +187,14 @@ export class TransactionsListModel {
       analyticUnit.currentCost = analyticUnit.buyAmount ? analyticUnit.buyAmount * analyticUnit.currentPrice : 0;
       analyticUnit.profitPer = analyticUnit.cost ? ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100 : 0;
       analyticUnit.profit = analyticUnit.currentCost - analyticUnit.cost;
+
+      // in case of single transaction
+      if (analyticUnit.lastActionPrice === analyticUnit.midPrice) {
+        analyticUnit.lastActionPrice = 0;
+      }
+      if (analyticUnit.lastActionPrice) {
+        analyticUnit.percentFromLastAction = (analyticUnit.currentPrice - analyticUnit.lastActionPrice) / analyticUnit.lastActionPrice * 100;
+      }
     });
 
     return analytic = TransactionsListModel.removeEmptyAnalytic(analytic);
@@ -195,7 +213,19 @@ export class TransactionsListModel {
   }
 
   static transformAnalyticToTableFormat(analytic: Analytic): Array<Array<string>> {
-    const table: Array<Array<string>> = [['Актив', 'Название', 'Количество', 'Текущая цена', 'Средняя цена', 'Текущая стоимость', 'Вложено', 'Доходность %', 'Доходность $']];
+    const table: Array<Array<string>> = [[
+      'Актив',
+      'Название', 
+      'Количество', 
+      'Текущая цена', 
+      'Средняя цена', 
+      'Текущая стоимость', 
+      'Вложено', 
+      'Доходность %', 
+      'Доходность $', 
+      'Цена последней транзакции', 
+      '% от последней транзакции'
+    ]];
 
     for (let key in analytic) {
       const row = [
@@ -208,6 +238,8 @@ export class TransactionsListModel {
         TransactionsListModel.convertToTextNumber(analytic[key].cost),
         TransactionsListModel.convertToTextNumber(analytic[key].profitPer),
         TransactionsListModel.convertToTextNumber(analytic[key].profit),
+        TransactionsListModel.convertToTextNumber(analytic[key].lastActionPrice),
+        TransactionsListModel.convertToTextNumber(analytic[key].percentFromLastAction),
       ];
 
       table.push(row);

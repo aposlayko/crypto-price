@@ -188,8 +188,8 @@ export class TransactionsListModel {
       analyticUnit.profitPer = analyticUnit.cost ? ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100 : 0;
       analyticUnit.profit = analyticUnit.currentCost - analyticUnit.cost;
 
-      // in case of single transaction or buy lower price
-      if (analyticUnit.lastActionPrice <= analyticUnit.midPrice) {
+      // in case of single transaction
+      if (analyticUnit.lastActionPrice === analyticUnit.midPrice) {
         analyticUnit.lastActionPrice = 0;
       }
       if (analyticUnit.lastActionPrice) {

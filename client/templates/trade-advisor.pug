@@ -1,0 +1,11 @@
+extends index.pug
+
+block content
+    h1 Trade advisor    
+        p
+            button#start-btn Start advisor
+            button#stop-btn Stop advisor
+    p#advisor-status
+
+    script(src='https://unpkg.com/axios/dist/axios.min.js') 
+    script(src='../assets/trade-advisor.js')

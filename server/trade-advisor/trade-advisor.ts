@@ -1,19 +1,37 @@
 import { Kline, ServerKline } from "./kline.interface";
+import { KlineListener } from "./listener";
 
 const MAX_KLINES = 10;
+const klineSettings = [{
+  symbol: 'btcusdt',
+  timeframe: '1m'
+}, {
+  symbol: 'ethusdt',
+  timeframe: '1m'
+}, {
+  symbol: 'solusdt',
+  timeframe: '1m'
+}];
 
-export class Chart {
-  klines: Kline[] = [];
+export class TradeAdvisor {
+  klines: {[key: string]: Kline[]} = {};
+  klineListener: KlineListener;
 
-  /**
-   * @method update adds kline to list
-   * @returns conclusion about kline
-   */
+  start() {
+    this.klineListener = new KlineListener(klineSettings, this.update.bind(this));
+    this.klineListener.start();
+  }
+
+  stop() {
+    this.klineListener.stop();
+  }
+  
   update(data: ServerKline): void {
     // if kline closed
     if (data.k.x) {
       const kline = this.dataToKline(data);
-      this.addKline(kline);
+      this.addKline(data.s, kline);
+      console.log(this.klines[data.s]);
       console.log(this.analizeKline(kline)); 
     }
   }
@@ -27,11 +45,15 @@ export class Chart {
     };
   }
 
-  addKline(kline: Kline) {
-    this.klines.push(kline);    
+  addKline(symbol: string, kline: Kline) {
+    if (!this.klines[symbol]) {
+      this.klines[symbol] = [];
+    }
 
-    if(this.klines.length > MAX_KLINES)  {
-      this.klines.shift();        
+    this.klines[symbol].push(kline);    
+
+    if(this.klines[symbol].length > MAX_KLINES)  {
+      this.klines[symbol].shift();        
     }
   }
 

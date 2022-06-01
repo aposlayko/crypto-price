@@ -1,19 +1,19 @@
 import express from 'express'
-import { KlineListener } from './listener';
+import { TradeAdvisor } from './trade-advisor';
 export const tradeAdvisorRouter = express.Router();
 
-const klineListener = new KlineListener();
+const tradeAdvisor = new TradeAdvisor();
 
 tradeAdvisorRouter.get('/', (req, res) => {
   res.render('trade-advisor');
 });
 
 tradeAdvisorRouter.post('/start', (req, res) => {
-  klineListener.start();
+  tradeAdvisor.start();
   res.json({status: 200, meessage: 'OK'});
 });
 
 tradeAdvisorRouter.post('/stop', (req, res) => {
-  klineListener.stop();
+  tradeAdvisor.stop();
   res.json({status: 200, meessage: 'OK'});
 });

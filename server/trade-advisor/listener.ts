@@ -1,16 +1,33 @@
 import WebSocket from 'ws';
-import { Chart } from './chart';
+import { ServerKline } from './kline.interface';
+
+
+interface ListenerSettings {
+  symbol: string;     // 'btcusdt'
+  timeframe: string;  // '1m'
+}
 
 export class KlineListener {
   ws: WebSocket;
-  chart: Chart;
+  settings: ListenerSettings[];
+  onMessage: (data: ServerKline) => void;
+
+  constructor(settings: ListenerSettings[], onMessage: (data: any) => void) {
+    this.settings = settings;
+    this.onMessage = onMessage;
+  }
+
+  settingsToUrl(): string {
+    return this.settings.map(o => `${o.symbol}@kline_${o.timeframe}`).join('/');    
+  }
 
   start(): void {
     if (this.ws) {
       return;
     }
-    this.chart = new Chart();
-    this.ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@kline_1m');    
+        
+    const urlParams = this.settingsToUrl();
+    this.ws = new WebSocket(`wss://stream.binance.com:9443/ws/${urlParams}`);
 
     this.ws.on('open', function() {
       console.log('socket open');
@@ -23,13 +40,12 @@ export class KlineListener {
     });
     this.ws.on('message', (event: ArrayBuffer) => {
       const data = JSON.parse(event.toString());
-      this.chart.update(data);
+      this.onMessage(data);
     });
   }
 
   stop() {
     this.ws.close();
-    this.ws = null;
-    this.chart = null;
+    this.ws = null;    
   }
 }

@@ -3,7 +3,7 @@ import { Klines } from "./klines.model";
 import { KlineListener } from "./listener";
 import { Trades } from "./trades.model";
 
-const MAX_KLINES = 10;
+const MAX_KLINES = 60;
 const klineSettings = [{
   symbol: 'btcusdt',
   timeframe: '1m'
@@ -36,8 +36,9 @@ export class TradeAdvisor {
     const symbol = data.s;
 
     if (isKlineClosed) {      
-      this.klines.add(symbol, kline);      
-      console.log(this.analizeKline(kline)); 
+      this.klines.add(symbol, kline);
+      this.openTrade(symbol, kline);   
+      console.log(symbol, this.analizeKline(kline)); 
     }
 
     this.trades.onPriceTick(symbol, kline.closeP);
@@ -50,7 +51,33 @@ export class TradeAdvisor {
       highP: Number(data.k.h),
       lowP: Number(data.k.l),
     };
-  }  
+  }
+  
+  openTrade(symbol: string, kline: Kline): void {
+    const ar = Klines.aspectRatioPrice(kline);
+    if (Klines.isHummerUp(kline)) {
+      const stopLoss = ar.bodyHigh + (ar.high - ar.bodyHigh) * 0.66;
+      const stopLimit = kline.closeP - (stopLoss - kline.closeP) * 2;
+      this.trades.open({
+        symbol,
+        type: 'short',
+        startPrice: kline.closeP,
+        stopLimit,
+        stopLoss,
+      });
+    }
+    if (Klines.isHummerDown(kline)) {
+      const stopLoss = ar.bodyLow + (ar.low - ar.bodyLow) * 0.66;
+      const stopLimit = kline.closeP + (kline.closeP - stopLoss) * 2;
+      this.trades.open({
+        symbol,
+        type: 'long',
+        startPrice: kline.closeP,
+        stopLimit,
+        stopLoss,
+      });
+    }
+  }
 
   analizeKline(kline: Kline) {
     // up body down

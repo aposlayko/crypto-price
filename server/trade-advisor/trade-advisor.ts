@@ -1,6 +1,7 @@
 import { Kline, ServerKline } from "./kline.interface";
 import { Klines } from "./klines.model";
 import { KlineListener } from "./listener";
+import { Trades } from "./trades.model";
 
 const MAX_KLINES = 10;
 const klineSettings = [{
@@ -17,6 +18,7 @@ const klineSettings = [{
 export class TradeAdvisor {
   klines = new Klines({maxStorageSize: MAX_KLINES});
   klineListener: KlineListener;
+  trades = new Trades();
 
   start() {
     this.klineListener = new KlineListener(klineSettings, this.update.bind(this));
@@ -30,12 +32,15 @@ export class TradeAdvisor {
   
   update(data: ServerKline): void {
     const isKlineClosed = data.k.x;
-    if (isKlineClosed) {
-      const kline = this.dataToKline(data);
-      const symbol = data.s;
+    const kline = this.dataToKline(data);
+    const symbol = data.s;
+
+    if (isKlineClosed) {      
       this.klines.add(symbol, kline);      
       console.log(this.analizeKline(kline)); 
     }
+
+    this.trades.onPriceTick(symbol, kline.closeP);
   }
 
   dataToKline(data: ServerKline): Kline {

@@ -1,4 +1,5 @@
 import { Kline, ServerKline } from "./kline.interface";
+import { Klines } from "./klines.model";
 import { KlineListener } from "./listener";
 
 const MAX_KLINES = 10;
@@ -14,7 +15,7 @@ const klineSettings = [{
 }];
 
 export class TradeAdvisor {
-  klines: {[key: string]: Kline[]} = {};
+  klines = new Klines({maxStorageSize: MAX_KLINES});
   klineListener: KlineListener;
 
   start() {
@@ -24,14 +25,15 @@ export class TradeAdvisor {
 
   stop() {
     this.klineListener.stop();
+    this.klines.clear();
   }
   
   update(data: ServerKline): void {
-    // if kline closed
-    if (data.k.x) {
+    const isKlineClosed = data.k.x;
+    if (isKlineClosed) {
       const kline = this.dataToKline(data);
-      this.addKline(data.s, kline);
-      console.log(this.klines[data.s]);
+      const symbol = data.s;
+      this.klines.add(symbol, kline);      
       console.log(this.analizeKline(kline)); 
     }
   }
@@ -43,19 +45,7 @@ export class TradeAdvisor {
       highP: Number(data.k.h),
       lowP: Number(data.k.l),
     };
-  }
-
-  addKline(symbol: string, kline: Kline) {
-    if (!this.klines[symbol]) {
-      this.klines[symbol] = [];
-    }
-
-    this.klines[symbol].push(kline);    
-
-    if(this.klines[symbol].length > MAX_KLINES)  {
-      this.klines[symbol].shift();        
-    }
-  }
+  }  
 
   analizeKline(kline: Kline) {
     // up body down

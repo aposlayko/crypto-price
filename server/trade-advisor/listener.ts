@@ -11,10 +11,16 @@ export class KlineListener {
   ws: WebSocket;
   settings: ListenerSettings[];
   onMessage: (data: ServerKline) => void;
+  onClose: () => void;
 
-  constructor(settings: ListenerSettings[], onMessage: (data: any) => void) {
+  constructor(
+    settings: ListenerSettings[],
+     onMessage: (data: ServerKline) => void,
+     onClose: () => void,
+  ) {
     this.settings = settings;
     this.onMessage = onMessage;
+    this.onClose = onClose
   }
 
   settingsToUrl(): string {
@@ -29,14 +35,16 @@ export class KlineListener {
     const urlParams = this.settingsToUrl();
     this.ws = new WebSocket(`wss://stream.binance.com:9443/ws/${urlParams}`);
 
-    this.ws.on('open', function() {
+    this.ws.on('open', () => {
       console.log('socket open');
     });
-    this.ws.on('error', function() {
+    this.ws.on('error', () => {
         console.log('socket error');    
     });
-    this.ws.on('close', function() {
-        console.log('socket close');    
+    this.ws.on('close', () => {
+      this.ws = null;
+      this.onClose(); 
+      console.log('socket close');    
     });
     this.ws.on('message', (event: ArrayBuffer) => {
       const data = JSON.parse(event.toString());
@@ -45,7 +53,6 @@ export class KlineListener {
   }
 
   stop() {
-    this.ws.close();
-    this.ws = null;    
+    this.ws.close();    
   }
 }

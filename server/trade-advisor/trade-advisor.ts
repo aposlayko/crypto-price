@@ -22,14 +22,12 @@ export class TradeAdvisor {
   trades = new Trades();
 
   start() {
-    this.klineListener = new KlineListener(klineSettings, this.update.bind(this));
+    this.klineListener = new KlineListener(klineSettings, this.update.bind(this), this.close.bind(this));
     this.klineListener.start();
   }
 
   stop() {
-    this.klineListener.stop();
-    this.klines.clear();
-    this.trades.clear();
+    this.klineListener.stop();   
   }
   
   update(data: ServerKline): void {
@@ -45,11 +43,16 @@ export class TradeAdvisor {
     }
 
     this.trades.onPriceTick(symbol, kline.closeP);
-  }  
+  }
+
+  close() {
+    this.klines.clear();
+    this.trades.clear();
+  }
   
   openTrade(symbol: string, kline: Kline): void {
     const {low, bodyLow, bodyHigh, high} = kline.getMoreData();
-    
+
     if (kline.isHummerUp()) {
       const stopLoss = bodyHigh + (high - bodyHigh) * 0.66;
       const stopLimit = kline.closeP - (stopLoss - kline.closeP) * 2;

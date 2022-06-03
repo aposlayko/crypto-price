@@ -73,8 +73,8 @@ export class Trades {
   log(): void {
     const all = this.storage.length;
     const success = this.storage.filter(t => t.isSuccess).length;
-    const fail = this.storage.filter(t => t.isSuccess === false);
-    const stillActive = this.storage.filter(t => t.isActive);
+    const fail = this.storage.filter(t => t.isSuccess === false).length;
+    const stillActive = this.storage.filter(t => t.isActive).length;
 
     console.log('all / success / fail / still active');
     console.log(`${all} / ${success} / ${fail} / ${stillActive}`);

@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { ServerKline } from './kline.interface';
+import { ServerKline } from './server-kline.interface';
 
 
 interface ListenerSettings {

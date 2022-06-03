@@ -22,10 +22,3 @@ export interface ServerKline {
     B: string,     // Ignore ("123456")
   }
 }
-
-export interface Kline {
-  openP: number;
-  closeP: number;
-  highP: number;
-  lowP: number;
-}

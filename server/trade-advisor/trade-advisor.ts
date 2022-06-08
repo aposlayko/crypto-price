@@ -53,8 +53,10 @@ export class TradeAdvisor {
   openTrade(symbol: string, kline: Kline): void {
     const {low, bodyLow, bodyHigh, high} = kline.getMoreData();
 
-    if (kline.isHummerUp() &&
-      this.klines.getHighOrDeepValue(high, symbol) > 0.7) {
+    if (
+      kline.isHummerUp()
+      && this.klines.getHighOrDeepValue(high, symbol, 30) > 0.7
+    ) {
 
       const stopLoss = bodyHigh + (high - bodyHigh) * 0.66;
       const stopLimit = kline.closeP - (stopLoss - kline.closeP) * 2;
@@ -66,8 +68,10 @@ export class TradeAdvisor {
         stopLoss,
       });
     }
-    if (kline.isHummerDown() &&
-      this.klines.getHighOrDeepValue(low, symbol) < 0.3) {
+    if (
+      kline.isHummerDown() 
+      && this.klines.getHighOrDeepValue(low, symbol, 30) < 0.3
+    ) {
         
       const stopLoss = bodyLow + (low - bodyLow) * 0.66;
       const stopLimit = kline.closeP + (kline.closeP - stopLoss) * 2;

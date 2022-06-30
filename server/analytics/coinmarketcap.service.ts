@@ -19,25 +19,25 @@ export class CoinMarketCapService {
         params: { 'symbol': cryptoList.join(',') },
         headers: { 'X-CMC_PRO_API_KEY': CoinMarketCapService.API_KEY },
       };
-        
+
       axios(options).then(response => {
-        const info: CoinsInfo = {};            
-            
+        const info: CoinsInfo = {};
+
         if (response?.data?.data) {
-          const data = response.data.data;      
-                    
-          for (let key in data) {        
-            if (data[key]) {              
+          const data = response.data.data;
+
+          for (let key in data) {
+            if (data[key]) {
               info[key] = {
                 name: data[key].name,
                 price: data[key].quote[CoinMarketCapService.DEFAULT_CURRENCY].price,
               }
             }
           }
-      
+
           console.log('Coinmarketcap info loaded');
-          resolve(info);  
-        }   
+          resolve(info);
+        }
       }).catch((err) => {
         console.log('Coinmarketcap API call error:', err.message);
         reject(err);

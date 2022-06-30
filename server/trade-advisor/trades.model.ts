@@ -78,6 +78,6 @@ export class Trades {
 
     console.log('all / success / fail / still active');
     console.log(`${all} / ${success} / ${fail} / ${stillActive}`);
-    console.log(`Result: ${(success / all * 100).toFixed(1)}`);
+    console.log(`Result: ${(success / all * 100).toFixed(1)}%`);
   }
 }

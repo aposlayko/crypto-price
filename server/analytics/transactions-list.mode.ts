@@ -1,6 +1,5 @@
 import { CoinsInfo } from "./coinmarketcap.service";
-
-const SCHEMA = [];
+import {Analytic} from './transaction-list.model';
 
 enum Operation {
   Buy = "купля",
@@ -31,22 +30,6 @@ interface Transaction {
   price: number;
   amount: number;
   date: Date;
-}
-
-interface Analytic {
-  [key: string]: {
-    name: string;
-    amount: number;
-    buyAmount: number;
-    cost: number;
-    midPrice: number;
-    currentPrice: number;
-    currentCost: number;
-    profit: number;
-    profitPer: number;
-    lastActionPrice: number;
-    percentFromLastAction: number;
-  };
 }
 
 export class TransactionsListModel {
@@ -99,7 +82,7 @@ export class TransactionsListModel {
     return this.transactionList.filter((o) => o.name === name);
   }
 
-  getAnalytic(coinInfo: CoinsInfo): Analytic {    
+  getAnalytic(coinInfo: CoinsInfo): Analytic {
     let analytic: Analytic = {};
 
     this.transactionList.forEach((t) => {
@@ -148,7 +131,7 @@ export class TransactionsListModel {
           } else {
             analyticUnit.buyAmount = 0;
           }
-          
+
 
           if (analyticUnit.amount) {
             analyticUnit.cost -= analyticUnit.midPrice * t.amount;
@@ -182,7 +165,7 @@ export class TransactionsListModel {
 
           break;
         }
-      
+
       analyticUnit.midPrice = analyticUnit.buyAmount ? analyticUnit.cost / analyticUnit.buyAmount : 0;
       analyticUnit.currentCost = analyticUnit.buyAmount ? analyticUnit.buyAmount * analyticUnit.currentPrice : 0;
       analyticUnit.profitPer = analyticUnit.cost ? ((analyticUnit.currentCost / analyticUnit.cost) - 1) * 100 : 0;
@@ -215,15 +198,15 @@ export class TransactionsListModel {
   static transformAnalyticToTableFormat(analytic: Analytic): Array<Array<string>> {
     const table: Array<Array<string>> = [[
       'Актив',
-      'Название', 
-      'Количество', 
-      'Текущая цена', 
-      'Средняя цена', 
-      'Текущая стоимость', 
-      'Вложено', 
-      'Доходность %', 
-      'Доходность $', 
-      'Цена последней транзакции', 
+      'Название',
+      'Количество',
+      'Текущая цена',
+      'Средняя цена',
+      'Текущая стоимость',
+      'Вложено',
+      'Доходность %',
+      'Доходность $',
+      'Цена последней транзакции',
       '% от последней транзакции'
     ]];
 

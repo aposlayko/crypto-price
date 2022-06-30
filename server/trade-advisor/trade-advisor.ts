@@ -55,7 +55,7 @@ export class TradeAdvisor {
 
     if (
       kline.isHummerUp()
-      && this.klines.getHighOrDeepValue(high, symbol, 30) > 0.7
+      // && this.klines.getHighOrDeepValue(high, symbol, 40) > 0.7
     ) {
 
       const stopLoss = bodyHigh + (high - bodyHigh) * 0.66;
@@ -70,7 +70,7 @@ export class TradeAdvisor {
     }
     if (
       kline.isHummerDown() 
-      && this.klines.getHighOrDeepValue(low, symbol, 30) < 0.3
+      // && this.klines.getHighOrDeepValue(low, symbol, 40) < 0.3
     ) {
         
       const stopLoss = bodyLow + (low - bodyLow) * 0.66;

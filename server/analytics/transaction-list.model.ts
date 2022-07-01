@@ -24,6 +24,8 @@ export interface Analytic {
   };
 }
 
+const stableCoins = ['USDT', 'USDC'];
+
 export class Transaction_v2 {
   from: string;
   to: string;
@@ -84,46 +86,39 @@ export class TransactionList {
       .filter((v, i, a) => a.indexOf(v) === i);
   }
 
+  getEmptyAnalyticUnit() {
+    return {
+      name: '',
+      amount: 0,
+      buyAmount: 0,
+      cost: 0,
+      midPrice: 0,
+      currentPrice: 0,
+      currentCost: 0,
+      profitPer: 0,
+      profit: 0,
+      lastActionPrice: 0,
+      percentFromLastAction: 0
+    };
+  }
 
   getAnalytic(coinInfo: CoinsInfo): Analytic {
     let analytic: Analytic = {};
 
     this.transactionList.forEach((t) => {
       if (t.from && !analytic[t.from]) {
-        analytic[t.from] = {
-          name: '',
-          amount: 0,
-          buyAmount: 0,
-          cost: 0,
-          midPrice: 0,
-          currentPrice: 0,
-          currentCost: 0,
-          profitPer: 0,
-          profit: 0,
-          lastActionPrice: 0,
-          percentFromLastAction: 0
-        }
+        analytic[t.from] = this.getEmptyAnalyticUnit();
       }
 
       if (t.to && !analytic[t.to]) {
-        analytic[t.to] = {
-          name: '',
-          amount: 0,
-          buyAmount: 0,
-          cost: 0,
-          midPrice: 0,
-          currentPrice: 0,
-          currentCost: 0,
-          profitPer: 0,
-          profit: 0,
-          lastActionPrice: 0,
-          percentFromLastAction: 0
-        }
+        analytic[t.to] = this.getEmptyAnalyticUnit();
       }
 
+      // init analytic objects if assets were filled
       const analyticFrom = analytic[t.from];
       const analyticTo = analytic[t.to];
 
+      // init names and prices
       if (analyticFrom) {
         analyticFrom.name = coinInfo[t.from].name;
         analyticFrom.currentPrice = coinInfo[t.from].price;
@@ -134,14 +129,14 @@ export class TransactionList {
         analyticTo.currentPrice = coinInfo[t.to].price;
       }
 
-      // ==== OPERATION PHASE ====
-      // without analyticFrom
+      // ==== OPERATION PHASE (calculate amount, cost and save last action price if stablecoin) ====
+      // without analyticFrom (asset was not filled - blank cell)
       if (t.type === Operation_v2.Deposit) {
         analyticTo.amount += t.amount;
         analyticTo.cost += t.amount * t.price;
       }
 
-      // without analyticTo
+      // without analyticTo (asset was not filled - blank cell)
       if (t.type === Operation_v2.Withdraw) {
         analyticFrom.amount -= t.amount;
         analyticFrom.cost -= t.amount * analyticFrom.midPrice;
@@ -152,6 +147,11 @@ export class TransactionList {
         analyticTo.amount += t.amount;
         analyticTo.cost += t.amount * t.price;
         analyticFrom.cost -= t.amount * t.price;
+
+        // if buying for stables
+        if (stableCoins.includes(t.from)) {
+          analyticTo.lastActionPrice = t.price;
+        }
       }
 
       if (t.type === Operation_v2.Sell) {
@@ -159,6 +159,11 @@ export class TransactionList {
         analyticTo.amount += t.amount  * t.price;
         analyticTo.cost += t.amount * t.price;
         analyticFrom.cost -= t.amount * analyticFrom.midPrice;
+
+        // if selling for stables
+        if (stableCoins.includes(t.to)) {
+          analyticFrom.lastActionPrice = t.price;
+        }
       }
 
       // ==== FINAL PHASE ====
@@ -186,6 +191,20 @@ export class TransactionList {
         analyticFrom.currentPrice = 0;
         analyticTo.profitPer = 0;
         analyticTo.profit = 0;
+      }
+
+      // in case of single transaction lastActionPrice is blank
+      if (analyticFrom && analyticFrom.lastActionPrice === analyticFrom.midPrice) {
+        analyticFrom.lastActionPrice = 0;
+      }
+      if (analyticTo && analyticTo.lastActionPrice === analyticTo.midPrice) {
+        analyticTo.lastActionPrice = 0;
+      }
+      if (analyticFrom?.lastActionPrice) {
+        analyticFrom.percentFromLastAction = (analyticFrom.currentPrice - analyticFrom.lastActionPrice) / analyticFrom.lastActionPrice * 100;
+      }
+      if (analyticTo?.lastActionPrice) {
+        analyticTo.percentFromLastAction = (analyticTo.currentPrice - analyticTo.lastActionPrice) / analyticTo.lastActionPrice * 100;
       }
     });
 

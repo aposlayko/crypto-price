@@ -8,20 +8,33 @@ enum Operation_v2 {
   Withdraw = "вывод",
 }
 
+export interface AnalyticValue {
+  name: string;
+  amount: number;
+  buyAmount: number;
+  cost: number;
+  midPrice: number;
+  currentPrice: number;
+  currentCost: number;
+  profit: number;
+  profitPer: number;
+  lastActionPrice: number;
+  percentFromLastAction: number;
+};
+
 export interface Analytic {
-  [key: string]: {
-    name: string;
-    amount: number;
-    buyAmount: number;
-    cost: number;
-    midPrice: number;
-    currentPrice: number;
-    currentCost: number;
-    profit: number;
-    profitPer: number;
-    lastActionPrice: number;
-    percentFromLastAction: number;
-  };
+  [key: string]: AnalyticValue;  
+}
+
+export interface AnalyticResults {
+  totalCost: number;           // How much were the assets purchased for
+  totalCurrentCost: number;    // How much assets are worth now
+  stablesCost: number;         // How much stablecoins 
+  stablesPer: number;          // Percentage of stablecoins
+  balance: number;             // assets and stablecoins
+  totalInvestments: number;    // invested for the whole period
+  assetsReturnPer: number;     // unrealized income
+  portfolioReturnsPer: number; // total portfolio result
 }
 
 const stableCoins = ['USDT', 'USDC'];
@@ -158,12 +171,7 @@ export class TransactionList {
         analyticFrom.amount -= t.amount;
         analyticTo.amount += t.amount  * t.price;
         analyticTo.cost += t.amount * t.price;
-        analyticFrom.cost -= t.amount * analyticFrom.midPrice;
-
-        // if selling for stables
-        if (stableCoins.includes(t.to)) {
-          analyticFrom.lastActionPrice = t.price;
-        }
+        analyticFrom.cost -= t.amount * analyticFrom.midPrice;        
       }
 
       // ==== FINAL PHASE ====
@@ -208,6 +216,51 @@ export class TransactionList {
       }
     });
 
+    analytic = TransactionList.removeEmptyAnalytic(analytic);
+    console.log(this.getAnalyticResults(analytic));
     return analytic;
+  }
+
+  getAnalyticResults(analytic: Analytic): AnalyticResults {
+    const totalCost = Object.keys(analytic).reduce((prev, key) => {
+      return stableCoins.includes(key) ? prev : prev + analytic[key].cost;
+    }, 0);
+
+    const totalCurrentCost = Object.keys(analytic).reduce((prev, key) => {
+      return stableCoins.includes(key) ? prev : prev + analytic[key].currentCost;
+    }, 0);
+
+    const stablesCost = Object.keys(analytic).reduce((prev, key) => {
+      return stableCoins.includes(key) ? prev + analytic[key].cost : prev;
+    }, 0);
+
+    const balance = stablesCost + totalCurrentCost;
+    const stablesPer = stablesCost / balance;
+    const totalInvestments = 1000;
+    const assetsReturnPer = totalCost ? (totalCurrentCost - totalCost) / totalCost : 0;
+    const portfolioReturnsPer = (balance - totalInvestments) / totalInvestments;
+
+    return {
+      totalCost,
+      totalCurrentCost,
+      stablesCost,
+      balance,
+      stablesPer,
+      totalInvestments,
+      assetsReturnPer,
+      portfolioReturnsPer
+    };
+  }
+
+  static removeEmptyAnalytic(analytic: Analytic): Analytic {
+    const newAnalytic = {};
+
+    for (let key in analytic) {
+      if (analytic[key].amount) {
+        newAnalytic[key] = analytic[key];
+      }
+    }
+
+    return newAnalytic;
   }
 }
